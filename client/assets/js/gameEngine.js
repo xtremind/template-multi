@@ -1,4 +1,7 @@
 window.onload = function () {
+    //connect to server
+    socket = io.connect('http://localhost:8000');
+
     //Initialise game variable
     var game = new Phaser.Game(800, 640, Phaser.CANVAS, 'gameContainer');
     
@@ -14,4 +17,5 @@ window.onload = function () {
 
     //Launch Boot state
     game.state.start('Boot');
+
 };

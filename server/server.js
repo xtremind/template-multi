@@ -63,7 +63,7 @@ function onReadyForRound() {
 }
 
 function broadcastingLoop() {
-    console.log("broadcastingLoop");
+    //console.log("broadcastingLoop");
 
 }
 
