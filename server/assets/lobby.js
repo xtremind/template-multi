@@ -4,18 +4,22 @@
 
 var Lobby = {
     onEnterLobby: function() {
+        console.log("onEnterLobby");
 
     },
 
     onHostGame: function() {
+        console.log("onHostGame");
         
     },
 
     onEnterPendingGame: function() {
+        console.log("onEnterPendingGame");
         
     },
 
     onLeavePendingGame: function() {
+        console.log("onLeavePendingGame");
         
     }
 }

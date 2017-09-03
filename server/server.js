@@ -1,7 +1,7 @@
 var express = require("express"),
     app = express(),
-    server = require("http").Server(app),
-    io = require("socket.io").listen(server);
+    http = require("http").Server(app),
+    io = require("socket.io").listen(http);
 
 var Lobby = require("./assets/lobby");
 
@@ -11,7 +11,12 @@ var updateInterval = 100; // Broadcast updates every 100 ms.
 
 // Serve up index.html.
 app.use(express.static("client"));
-server.listen(process.env.PORT || 8000);
+http.listen(process.env.PORT || 8000);
+
+//redirect client part
+app.get('/', function(req, res){
+    res.sendFile(__dirname + '/client/index.html');
+});
 
 init();
 
@@ -43,18 +48,22 @@ function setEventHandlers () {
 };
 
 function onClientDisconnect() {
+    console.log("onClientDisconnect");
 
 }
 
 function onStartGame() {
+    console.log("onStartGame");
 
 }
 
 function onReadyForRound() {
+    console.log("onReadyForRound");
 
 }
 
 function broadcastingLoop() {
+    console.log("broadcastingLoop");
 
 }
 
