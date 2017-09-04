@@ -30,7 +30,7 @@ function init() {
     setInterval(broadcastingLoop, updateInterval);
     
     console.log("Server Initialized");
-};
+}
 
 function setEventHandlers () {
 	io.on("connection", function(client) {
@@ -45,7 +45,7 @@ function setEventHandlers () {
 		client.on("enter pending game", Lobby.onEnterPendingGame);
 		client.on("leave pending game", Lobby.onLeavePendingGame);
 	});
-};
+}
 
 function onClientDisconnect() {
     console.log("onClientDisconnect");
