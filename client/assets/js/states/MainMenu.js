@@ -27,6 +27,7 @@ Game.MainMenu.prototype = {
     
     start : function () {
         // start the game
-        this.state.start('Level');
+        //this.state.start('Level');
+        socket.emit('host game');
     }
 };
