@@ -7,7 +7,7 @@ Game.MainMenu.prototype = {
         // add a background image
 
         // add a title
-        var title = this.add.text(this.world.centerX, 80, 'Pacman Battle Royale', {font: '50px Arial', fill: '#ffffff'});
+        var title = this.add.text(this.world.centerX, 80, 'Template Game', {font: '50px Arial', fill: '#ffffff'});
         title.anchor.setTo(0.5, 0.5);
 
         // show the score
@@ -25,8 +25,19 @@ Game.MainMenu.prototype = {
         upKey.onDown.addOnce(this.start, this);
     },
     
+    createButton: function (x, y, template, text) {
+
+    },
+
     start : function () {
         // start the game
-        this.state.start('Level');
+        //his.state.start('Level');
+
+        socket.emit('host game', {});
+
+        
+		socket.on("new game", function(){
+            console.log("new game");
+        });
     }
 };

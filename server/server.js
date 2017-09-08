@@ -3,8 +3,6 @@ var express = require("express"),
     http = require("http").Server(app),
     io = require("socket.io").listen(http);
 
-var Lobby = require("./assets/lobby");
-
 // Broadcasting loop works better than sending an update every time a player moves because waiting for player movement messages adds
 // another source of jitter.
 var updateInterval = 100; // Broadcast updates every 100 ms.
@@ -21,8 +19,8 @@ app.get('/', function(req, res){
 init();
 
 function init() {
-    //Lobby.initiate();
-    
+	console.log("Starting Server");
+	
 	// Begin listening for events.
 	setEventHandlers();
 
@@ -30,7 +28,7 @@ function init() {
     setInterval(broadcastingLoop, updateInterval);
     
     console.log("Server Initialized");
-};
+}
 
 function setEventHandlers () {
 	io.on("connection", function(client) {
@@ -40,16 +38,27 @@ function setEventHandlers () {
 		client.on("start game on server", onStartGame);
 		client.on("ready for round", onReadyForRound);
 
-		client.on("enter lobby", Lobby.onEnterLobby);
-		client.on("host game", Lobby.onHostGame);
-		client.on("enter pending game", Lobby.onEnterPendingGame);
-		client.on("leave pending game", Lobby.onLeavePendingGame);
+		client.on("get gamelist", onGameList);
+		client.on("host game", onHostGame);
+		//client.on("enter pending game", Lobby.onEnterPendingGame);
+		//client.on("leave pending game", Lobby.onLeavePendingGame);
 	});
-};
+}
 
 function onClientDisconnect() {
     console.log("onClientDisconnect");
 
+}
+
+function onGameList() {
+    console.log("onGameList");
+
+}
+
+function onHostGame(data) {
+    console.log("onHostGame");
+	//this.emit("new game", {});
+    //this.broadcast.emit("new game", {});
 }
 
 function onStartGame() {
