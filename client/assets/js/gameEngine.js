@@ -3,7 +3,7 @@ window.onload = function () {
     socket = io.connect('http://localhost:8000');
 
     //Initialise game variable
-    var game = new Phaser.Game(800, 640, Phaser.CANVAS, 'gameContainer');
+    game = new Phaser.Game(800, 640, Phaser.CANVAS, 'gameContainer');
     
     game.global = {
         score: 0
