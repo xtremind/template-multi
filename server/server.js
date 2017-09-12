@@ -40,8 +40,6 @@ function setEventHandlers () {
 
 		client.on("get gamelist", onGameList);
 		client.on("host game", onHostGame);
-		//client.on("enter pending game", Lobby.onEnterPendingGame);
-		//client.on("leave pending game", Lobby.onLeavePendingGame);
 	});
 }
 
@@ -51,14 +49,19 @@ function onClientDisconnect() {
 }
 
 function onGameList() {
-    console.log("onGameList");
+	console.log("onGameList");
+	
+	this.emit("list games", [{gameid: 1}, {gameid: 2}]);
 
 }
 
 function onHostGame(data) {
-    console.log("onHostGame");
-	//this.emit("new game", {});
-    //this.broadcast.emit("new game", {});
+	console.log("onHostGame");
+	//max 5 hosted games 
+
+	this.emit("new game", {gameid: 1});
+	this.broadcast.emit("new game", {gameid: 1});
+	
 }
 
 function onStartGame() {

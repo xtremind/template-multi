@@ -3,7 +3,7 @@ Game.MainMenu = function (game) {
 
 Game.MainMenu.prototype = {
     create : function () {
-
+        that = this;
         // add a background image
 
         // add a title
@@ -24,34 +24,32 @@ Game.MainMenu.prototype = {
         // when the key UP is pressed, it will call the 'start' function once
         upKey.onDown.addOnce(this.start, this);
 
-        //add graphics to state
-        var g1 = game.add.graphics(100, 100);
-        var g2 = game.add.graphics(100, 100);
+        //add rounded buttons
+        position=0;
+        this.drawButton("Host Game", "1", position++, function(){socket.emit('host game', {});});
 
-        //clear the graphics
-        g1.clear();
-        
-        i=0;
+		socket.on("list games", function(data){
+            data.forEach(function(party){
+                that.drawButton("Join Party", party.gameid, position++, function(){console.log("join game " + party.gameid); socket.emit('join game', {id: party.gameid});});
+            });
+        });
 
-        //add rounded button
-        this.drawButtonWithText(g1, 50, 100, 100, 100, 7, {bSize: 2, bColor: 0x0000FF, bAlpha: 1, fColor: 0x027a71, fAlpha: 1}, "no", {font: '25px Arial', fill: '#ffffff'}, "1", function(){console.log("click a" + i++);});
-        //add rounded button
-        this.drawButtonWithText(g2, 50, 250, 100, 100, 7, {bSize: 2, bColor: 0x0000FF, bAlpha: 1, fColor: 0x027a71, fAlpha: 1}, "yes", {font: '25px Arial', fill: '#ffffff'}, "1", function(){console.log("click b" + i++);});
-    
-        //window.graphics = graphics;
+		socket.on("new game", function(party){
+            that.drawButton("Join Party", party.gameid, position++, function(){console.log("join game " + party.gameid); socket.emit('join game', {id: party.gameid});});
+        });
+
+        socket.emit('get gamelist', {});
+    },
+
+    drawButton : function(btnTitle, btnId, btnPosition, callBack){
+        var button = game.add.graphics(100, 100);
+        this.drawButtonWithText(button, 50, 100+70*btnPosition, 100, 50, 7, {bSize: 2, bColor: 0x0000FF, bAlpha: 1, fColor: 0x027a71, fAlpha: 1}, btnTitle, {font: '25px Arial', fill: '#ffffff'}, btnId, callBack);
     },
 
     start : function () {
         // start the game
 
         //this.state.start('Level');
-
-        socket.emit('host game', {});
-
-        
-		socket.on("new game", function(){
-            console.log("new game");
-        });
     },
 
     drawRoundedRect : function (graphics, x, y, width, height, radius, btnStyle) {
