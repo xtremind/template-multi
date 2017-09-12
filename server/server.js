@@ -37,12 +37,12 @@ function setEventHandlers () {
 		console.log("New player has connected: " + client.id);
 
 		client.on("disconnect", onClientDisconnect);
-		client.on("start game on server", onStartGame);
-		client.on("ready for round", onReadyForRound);
 
 		client.on("get gamelist", onGameList);
 		client.on("host game", onHostGame);
 		client.on("join game", onJoinGame);
+		
+		client.on("start game on server", onStartGame);
 	});
 }
 
@@ -85,11 +85,6 @@ function gameAlreadyHostBy(id){
 
 function onStartGame() {
     console.log("onStartGame");
-}
-
-function onReadyForRound() {
-    console.log("onReadyForRound");
-
 }
 
 function broadcastingLoop() {
