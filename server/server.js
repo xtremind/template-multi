@@ -7,6 +7,8 @@ var express = require("express"),
 // another source of jitter.
 var updateInterval = 100; // Broadcast updates every 100 ms.
 
+var gameList = [];
+
 // Serve up index.html.
 app.use(express.static("client"));
 http.listen(process.env.PORT || 8000);
@@ -40,6 +42,7 @@ function setEventHandlers () {
 
 		client.on("get gamelist", onGameList);
 		client.on("host game", onHostGame);
+		client.on("join game", onJoinGame);
 	});
 }
 
@@ -50,23 +53,38 @@ function onClientDisconnect() {
 
 function onGameList() {
 	console.log("onGameList");
-	
-	this.emit("list games", [{gameid: 1}, {gameid: 2}]);
-
+	this.emit("list games", gameList);
 }
 
-function onHostGame(data) {
+function onHostGame() {
 	console.log("onHostGame");
 	//max 5 hosted games 
+	if(gameList.length < 6 && !gameAlreadyHostBy(this.id)){
+		console.log("host new game : " + this.id);
+		var game = {gameid: this.id};
+		gameList.push(game);
+		this.emit("new game", game);
+		this.broadcast.emit("new game", game);
+	} else {
+		console.log("game already host : " + this.id);
+	}
+}
 
-	this.emit("new game", {gameid: 1});
-	this.broadcast.emit("new game", {gameid: 1});
-	
+function onJoinGame(data) {
+	console.log("onJoinGame : " + data.id);
+}
+
+function gameAlreadyHostBy(id){
+	for (var i = 0; i < gameList.length; i++) {
+		if(gameList[i].gameid === id){
+			return true;
+		}
+	}
+	return false;
 }
 
 function onStartGame() {
     console.log("onStartGame");
-
 }
 
 function onReadyForRound() {
@@ -76,6 +94,5 @@ function onReadyForRound() {
 
 function broadcastingLoop() {
     //console.log("broadcastingLoop");
-
 }
 
