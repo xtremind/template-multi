@@ -1,10 +1,10 @@
-Game.Level = function (game) {
+Game.WaitingRoom = function (game) {
 	this.debug = false;
 };
 
-Game.Level.prototype = {
+Game.WaitingRoom.prototype = {
 	create : function () {
-
+		console.log("WaitingRoom.create");
 	},
 
 	update : function () {

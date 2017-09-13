@@ -46,9 +46,32 @@ function setEventHandlers () {
 	});
 }
 
-function onClientDisconnect() {
+function onClientDisconnect () {
     console.log("onClientDisconnect");
+	console.log("\tPlayer disconnected: "+this.id);
+	
+    //find the game by his id
+	var removeGame = gameById(this.id);
+	
+	//if no game find
+	if (!removeGame) {
+		console.log("Game not found: "+this.id);
+		return;
+	}
+	
+	//remove the hosted game from the list of games
+	gameList.splice(gameList.indexOf(removeGame), 1);
+	
+	//force refresh gamelist to others
+	this.broadcast.emit("list games", gameList);
+}
 
+var gameById = function (id) {
+    for (var i = 0; i < gameList.length; i++) {
+        if (gameList[i].gameid == id)
+            return gameList[i];
+    }
+    return false;
 }
 
 function onGameList() {
@@ -63,8 +86,8 @@ function onHostGame() {
 		console.log("host new game : " + this.id);
 		var game = {gameid: this.id};
 		gameList.push(game);
-		this.emit("new game", game);
-		this.broadcast.emit("new game", game);
+		this.emit("game joined", game);
+		this.broadcast.emit("list games", gameList);
 	} else {
 		console.log("game already host : " + this.id);
 	}
@@ -72,6 +95,17 @@ function onHostGame() {
 
 function onJoinGame(data) {
 	console.log("onJoinGame : " + data.id);
+	
+    //find the game by his id
+	var game = gameById(data.id);
+
+	//if no game find
+	if(!game){
+		console.log("Game not found: "+data.id);
+		return;
+	}
+
+	this.emit("game joined", game);
 }
 
 function gameAlreadyHostBy(id){

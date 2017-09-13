@@ -1,4 +1,5 @@
 Game.MainMenu = function (game) {
+    this.gameList = [];
 };
 
 Game.MainMenu.prototype = {
@@ -10,46 +11,60 @@ Game.MainMenu.prototype = {
         var title = this.add.text(this.world.centerX, 80, 'Template Game', {font: '50px Arial', fill: '#ffffff'});
         title.anchor.setTo(0.5, 0.5);
 
-        // show the score
-        var score = this.add.text(this.world.centerX, this.world.centerY, 'Score : ' + this.game.global.score , {font: '25px Arial', fill: '#ffffff'});
-        score.anchor.setTo(0.5, 0.5);
-
-        // explain how to start a game
-        var comment = this.add.text(this.world.centerX, this.world.height-80, 'Press UP key to start ', {font: '25px Arial', fill: '#ffffff'});
-        comment.anchor.setTo(0.5, 0.5);
-
-        // create a new Phaser keyboard variable
-        var upKey = this.input.keyboard.addKey(Phaser.Keyboard.UP);
-
-        // when the key UP is pressed, it will call the 'start' function once
-        upKey.onDown.addOnce(this.start, this);
-
         //add rounded buttons
         position=0;
         this.drawButton("Host Game", "1", position++, function(){socket.emit('host game', {});});
 
 		socket.on("list games", function(data){
+            // delete current join List
+            that.gameList.forEach(function(joinButton){
+                that.deleteButton(joinButton);
+            });
+            
+            for(var key in that.gameList){
+                that.deleteButton(that.gameList[key]);
+            }
+
+            that.gameList = [];
+            position = 0;
+
+            // create new join List
             data.forEach(function(party){
-                that.drawButton("Join Party", party.gameid, position++, function(){console.log("join game " + party.gameid); socket.emit('join game', {id: party.gameid});});
+                that.gameList[party.gameid] = that.drawButton("Join Party", party.gameid, ++position, function(){
+                    console.log("join game " + party.gameid); 
+                    socket.emit('join game', {id: party.gameid});
+                });
             });
         });
 
-		socket.on("new game", function(party){
-            that.drawButton("Join Party", party.gameid, position++, function(){console.log("join game " + party.gameid); socket.emit('join game', {id: party.gameid});});
+        socket.on("game joined", function(party){
+            that.gameJoined(party.gameid);
         });
 
         socket.emit('get gamelist', {});
     },
 
+    gameJoined : function(gameid){
+        console.log("game joined" + gameid);
+        socket.off("list games");
+        socket.off("new game");
+        socket.off("game joined");
+        game.currentGameId = gameid;
+        that.state.start('WaitingRoom');
+    },
+
     drawButton : function(btnTitle, btnId, btnPosition, callBack){
         var button = game.add.graphics(100, 100);
-        this.drawButtonWithText(button, 50, 100+70*btnPosition, 100, 50, 7, {bSize: 2, bColor: 0x0000FF, bAlpha: 1, fColor: 0x027a71, fAlpha: 1}, btnTitle, {font: '25px Arial', fill: '#ffffff'}, btnId, callBack);
+        return this.drawButtonWithText(button, 50, 100+70*btnPosition, 100, 50, 7, {bSize: 2, bColor: 0x0000FF, bAlpha: 1, fColor: 0x027a71, fAlpha: 1}, btnTitle, {font: '25px Arial', fill: '#ffffff'}, btnId, callBack);
+    },
+
+    deleteButton : function(button) {
+        button.children[0].destroy();
+        button.clear();
     },
 
     start : function () {
-        // start the game
-
-        //this.state.start('Level');
+        
     },
 
     drawRoundedRect : function (graphics, x, y, width, height, radius, btnStyle) {
