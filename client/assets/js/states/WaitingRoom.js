@@ -1,5 +1,4 @@
 Game.WaitingRoom = function (game) {
-    this.debug = false;
     this.playersList = [];
 };
 
@@ -72,12 +71,6 @@ Game.WaitingRoom.prototype = {
 	update : function () {
 
 	},
-
-	render: function () {
-		if (this.debug) {
-
-		}
-	},
 	
     drawButton : function(btnTitle, btnId, btnPosition, callBack){
         var button = game.add.graphics(100, 100);
@@ -105,8 +98,8 @@ Game.WaitingRoom.prototype = {
         return graphics;
     },
 
-    drawText : function (x, y, width, height, text, textStyle) {
-        var text = game.add.text(x + width / 2, y + height / 2, text, textStyle);
+    drawText : function (x, y, width, height, label, labelStyle) {
+        var text = game.add.text(x + width / 2, y + height / 2, label, labelStyle);
         text.smoothed = true;
         text.anchor.x = 0.5;
         text.anchor.y = 0.4;
