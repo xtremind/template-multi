@@ -30,7 +30,7 @@ Game.prototype = {
 
     playerById: function (id) {
         for (var i = 0; i < this.players.length; i++) {
-            if (this.players[i].id == id)
+            if (this.players[i] == id)
                 return this.players[i];
         }    
         return false;

@@ -44,9 +44,52 @@ function setEventHandlers () {
 		client.on("get gamelist", onGameList);
 		client.on("host game", onHostGame);
 		client.on("join game", onJoinGame);
+
+		client.on("get playerlist", onPlayerList);
+		client.on("leave game", onLeaveGame);
 		
 		client.on("start game on server", onStartGame);
 	});
+}
+
+function onPlayerList(data) {
+	console.log("onPlayerList");
+
+	//find the game by his id
+	var game = gameById(data.id);
+	
+	//if no game find
+	if (!game) {
+		console.log("Game not found: "+ data.id);
+		return;
+	}
+
+	this.emit("list players", game.getPlayers());
+}
+
+function onLeaveGame(data) {
+	console.log("onLeaveGame");
+
+	//find the game by his id
+	var game = gameById(data.id);
+	
+	//if no game find
+	if (!game) {
+		console.log("Game not found: "+this.id);
+		return;
+	}
+
+	if(this.id === data.id) {
+		// force leave waiting game
+		this.broadcast.emit("end game", game);
+		
+		//remove the hosted game from the list of games
+		gameList.splice(gameList.indexOf(game), 1);
+	} else {
+		// force refresh list player
+		game.removePlayer(this.id);
+		this.broadcast.emit("list players", game.getPlayers());
+	}
 }
 
 function onClientDisconnect () {
@@ -66,7 +109,7 @@ function onClientDisconnect () {
 	gameList.splice(gameList.indexOf(removeGame), 1);
 	
 	//force refresh gamelist to others
-	this.broadcast.emit("list games", gameList.filter(checkWaitingGame).slice(0,6));
+	this.broadcast.emit("list games", gameList.filter(checkWaitingGame).slice(0,4));
 }
 
 var gameById = function (id) {
@@ -79,7 +122,7 @@ var gameById = function (id) {
 
 function onGameList() {
 	console.log("onGameList");
-	this.emit("list games", gameList.filter(checkWaitingGame).slice(0,6));
+	this.emit("list games", gameList.filter(checkWaitingGame).slice(0,4));
 }
 
 function checkWaitingGame(game){
@@ -88,10 +131,10 @@ function checkWaitingGame(game){
 
 function onHostGame() {
 	console.log("onHostGame");
-	//max 5 hosted games 
 	if(!gameAlreadyHostBy(this.id)){
 		console.log("host new game : " + this.id);
 		var game = new Game(this.id);
+		game.addPlayer(this.id);
 		gameList.push(game);
 		this.emit("game joined", game);
 		this.broadcast.emit("list games", gameList);
@@ -112,6 +155,8 @@ function onJoinGame(data) {
 		return;
 	}
 
+	game.addPlayer(this.id);
+	this.broadcast.emit("list players", game.getPlayers());
 	this.emit("game joined", game);
 }
 

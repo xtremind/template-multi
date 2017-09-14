@@ -27,25 +27,41 @@ Game.WaitingRoom.prototype = {
             }
         
             that.playersList = [];
+            position = 0;
 
             // create new join List
             data.forEach(function(player){
-                that.playersList[player] = that.drawText(x, 100+70*position, 100, 50, player, {font: '25px Arial', fill: '#ffffff'}); 
+                that.playersList[player] = that.drawText(that.world.centerX, 100+70*position++, 100, 50, player, {font: '25px Arial', fill: '#ffffff'}); 
             });
             
             // if hoster : button start if more at least 2 players
+            if(game.currentGameId === this.id && data.length > 1){
+                that.drawButton("Start Game", "1", position++, function(){
+                    socket.emit('start game', {id: game.currentGameId});
+                    that.state.start('Party');
+                });
+            }
 		});
+
+		socket.on("end game", function(data){
+            socket.off("list players");
+            socket.off("end game");
+            game.currentGameId = null;
+            that.state.start('MainMenu');
+        });
 
         // else : leave waiting room
         // if hoster leave room, everybody leave room
 
         this.drawButton("Leave Game", "1", position++, function(){
-            socket.emit('leave game', {});
+            socket.emit('leave game', {id: game.currentGameId});
+            socket.off("list players");
+            socket.off("end game");
             game.currentGameId = null;
             that.state.start('MainMenu');
         });
 
-        socket.emit('get playerlist', {});
+        socket.emit('get playerlist', {id: game.currentGameId});
 	},
 
 	update : function () {
