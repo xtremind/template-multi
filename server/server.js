@@ -66,7 +66,7 @@ function onClientDisconnect () {
 	gameList.splice(gameList.indexOf(removeGame), 1);
 	
 	//force refresh gamelist to others
-	this.broadcast.emit("list games", gameList);
+	this.broadcast.emit("list games", gameList.filter(checkWaitingGame).slice(0,6));
 }
 
 var gameById = function (id) {
@@ -83,7 +83,7 @@ function onGameList() {
 }
 
 function checkWaitingGame(game){
-	game.status === 'WAITING';
+	return game.status == "WAITING";
 }
 
 function onHostGame() {

@@ -4,7 +4,8 @@ Game.MainMenu = function (game) {
 
 Game.MainMenu.prototype = {
     create : function () {
-        var position = 0,
+		console.log("MainMenu.create");
+        position = 0,
             that = this;
 
         // add a background image
@@ -17,17 +18,13 @@ Game.MainMenu.prototype = {
         this.drawButton("Host Game", "1", position++, function(){socket.emit('host game', {});});
 
 		socket.on("list games", function(data){
-            // delete current join List
-            that.gameList.forEach(function(joinButton){
-                that.deleteButton(joinButton);
-            });
-            
+            // delete current join List            
             for(var key in that.gameList){
                 that.deleteButton(that.gameList[key]);
             }
 
             that.gameList = [];
-            position = 0;
+            var position = 0;
 
             // create new join List
             data.forEach(function(party){
@@ -50,6 +47,7 @@ Game.MainMenu.prototype = {
         socket.off("list games");
         socket.off("game joined");
         game.currentGameId = id;
+        that.gameList = [];
         that.state.start('WaitingRoom');
     },
 
