@@ -85,6 +85,7 @@ function onLeaveGame(data) {
 		
 		//remove the hosted game from the list of games
 		gameList.splice(gameList.indexOf(game), 1);
+		this.broadcast.emit("list games", gameList.filter(checkWaitingGame).slice(0,4));
 	} else {
 		// force refresh list player
 		game.removePlayer(this.id);

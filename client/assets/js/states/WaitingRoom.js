@@ -9,6 +9,7 @@ Game.WaitingRoom.prototype = {
 
         position = 0;
         that = this;
+        startButton = null;
 
 
         // add a title
@@ -29,6 +30,10 @@ Game.WaitingRoom.prototype = {
             that.playersList = [];
             position = 0;
 
+            if(startButton != null){
+                that.deleteButton(startButton);
+                startButton = null;
+            }
             // create new join List
             data.forEach(function(player){
                 that.playersList[player] = that.drawText(that.world.centerX, 100+70*position++, 100, 50, player, {font: '25px Arial', fill: '#ffffff'}); 
@@ -36,7 +41,7 @@ Game.WaitingRoom.prototype = {
             
             // if hoster : button start if more at least 2 players
             if(game.currentGameId === this.id && data.length > 1){
-                that.drawButton("Start Game", "1", position++, function(){
+                startButton =that.drawButton("Start Game", "1", position++, function(){
                     socket.emit('start game', {id: game.currentGameId});
                     that.state.start('Party');
                 });
