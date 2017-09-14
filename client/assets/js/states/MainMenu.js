@@ -4,7 +4,9 @@ Game.MainMenu = function (game) {
 
 Game.MainMenu.prototype = {
     create : function () {
-        that = this;
+        var position = 0,
+            that = this;
+
         // add a background image
 
         // add a title
@@ -12,7 +14,6 @@ Game.MainMenu.prototype = {
         title.anchor.setTo(0.5, 0.5);
 
         //add rounded buttons
-        position=0;
         this.drawButton("Host Game", "1", position++, function(){socket.emit('host game', {});});
 
 		socket.on("list games", function(data){
@@ -30,26 +31,25 @@ Game.MainMenu.prototype = {
 
             // create new join List
             data.forEach(function(party){
-                that.gameList[party.gameid] = that.drawButton("Join Party", party.gameid, ++position, function(){
-                    console.log("join game " + party.gameid); 
-                    socket.emit('join game', {id: party.gameid});
+                that.gameList[party.id] = that.drawButton("Join Party", party.id, ++position, function(){
+                    console.log("join game " + party.id); 
+                    socket.emit('join game', {id: party.id});
                 });
             });
         });
 
         socket.on("game joined", function(party){
-            that.gameJoined(party.gameid);
+            that.gameJoined(party.id);
         });
 
         socket.emit('get gamelist', {});
     },
 
-    gameJoined : function(gameid){
-        console.log("game joined" + gameid);
+    gameJoined : function(id){
+        console.log("game joined " + id);
         socket.off("list games");
-        socket.off("new game");
         socket.off("game joined");
-        game.currentGameId = gameid;
+        game.currentGameId = id;
         that.state.start('WaitingRoom');
     },
 
@@ -75,8 +75,8 @@ Game.MainMenu.prototype = {
         return graphics;
     },
 
-    drawText : function (x, y, width, height,text, textStyle) {
-        var text = game.add.text(x + width / 2, y + height / 2, text, textStyle);
+    drawText : function (x, y, width, height, label, labelStyle) {
+        var text = game.add.text(x + width / 2, y + height / 2, label, labelStyle);
         text.smoothed = true;
         text.anchor.x = 0.5;
         text.anchor.y = 0.4;
@@ -91,7 +91,6 @@ Game.MainMenu.prototype = {
     },
 
     drawButtonWithText: function (graphics, x, y, width, height, radius, btnStyle, text, textStyle, btnName, callback) {
-        
         graphics.clear();  
         graphics.name = btnName;
 

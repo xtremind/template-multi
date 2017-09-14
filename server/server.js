@@ -3,6 +3,9 @@ var express = require("express"),
     http = require("http").Server(app),
     io = require("socket.io").listen(http);
 
+
+	var Game = require("./entities/game");
+
 // Broadcasting loop works better than sending an update every time a player moves because waiting for player movement messages adds
 // another source of jitter.
 var updateInterval = 100; // Broadcast updates every 100 ms.
@@ -68,7 +71,7 @@ function onClientDisconnect () {
 
 var gameById = function (id) {
     for (var i = 0; i < gameList.length; i++) {
-        if (gameList[i].gameid == id)
+        if (gameList[i].id == id)
             return gameList[i];
     }
     return false;
@@ -76,15 +79,19 @@ var gameById = function (id) {
 
 function onGameList() {
 	console.log("onGameList");
-	this.emit("list games", gameList);
+	this.emit("list games", gameList.filter(checkWaitingGame).slice(0,6));
+}
+
+function checkWaitingGame(game){
+	game.status === 'WAITING';
 }
 
 function onHostGame() {
 	console.log("onHostGame");
 	//max 5 hosted games 
-	if(gameList.length < 6 && !gameAlreadyHostBy(this.id)){
+	if(!gameAlreadyHostBy(this.id)){
 		console.log("host new game : " + this.id);
-		var game = {gameid: this.id};
+		var game = new Game(this.id);
 		gameList.push(game);
 		this.emit("game joined", game);
 		this.broadcast.emit("list games", gameList);
@@ -110,7 +117,7 @@ function onJoinGame(data) {
 
 function gameAlreadyHostBy(id){
 	for (var i = 0; i < gameList.length; i++) {
-		if(gameList[i].gameid === id){
+		if(gameList[i].id === id){
 			return true;
 		}
 	}
