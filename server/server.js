@@ -78,10 +78,10 @@ function onLeaveGame(data) {
 		console.log("Game not found: "+this.id);
 		return;
 	}
-
+	
 	if(this.id === data.id) {
 		// force leave waiting game
-		this.broadcast.emit("end game", game);
+		this.to(data.id).broadcast.emit("end game", game);
 		
 		//remove the hosted game from the list of games
 		gameList.splice(gameList.indexOf(game), 1);
@@ -89,8 +89,9 @@ function onLeaveGame(data) {
 	} else {
 		// force refresh list player
 		game.removePlayer(this.id);
-		this.broadcast.emit("list players", game.getPlayers());
+		this.to(data.id).broadcast.emit("list players", game.getPlayers());
 	}
+	this.leave(data.id);
 }
 
 function onClientDisconnect () {
@@ -137,6 +138,7 @@ function onHostGame() {
 		var game = new Game(this.id);
 		game.addPlayer(this.id);
 		gameList.push(game);
+		this.join(this.id);
 		this.emit("game joined", game);
 		this.broadcast.emit("list games", gameList);
 	} else {
@@ -146,7 +148,7 @@ function onHostGame() {
 
 function onJoinGame(data) {
 	console.log("onJoinGame : " + data.id);
-	
+
     //find the game by his id
 	var game = gameById(data.id);
 
@@ -156,8 +158,9 @@ function onJoinGame(data) {
 		return;
 	}
 
+	this.join(data.id);
 	game.addPlayer(this.id);
-	this.broadcast.emit("list players", game.getPlayers());
+	this.to(data.id).broadcast.emit("list players", game.getPlayers());
 	this.emit("game joined", game);
 }
 
