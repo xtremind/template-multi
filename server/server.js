@@ -12,7 +12,8 @@ var express = require("express"),
 var updateInterval = 100; // Broadcast updates every 100 ms.
 
 var gameList = [],
-	playerList = [];
+	playerList = [],
+	playersInGame = [];
 
 // Serve up index.html.
 app.use(express.static("client"));
@@ -117,23 +118,34 @@ function onLeaveGame(data) {
 function onClientDisconnect () {
     console.log("onClientDisconnect");
 	console.log("\tPlayer disconnected: " + this.id);
-	
-	// TODO remove player from playerList
-
+		
     //find the game by his id
-	var removeGame = gameById(this.id);
+	var gameId = playersInGame[this.id];
+	var currentGame = gameById(gameId);
 	
-	//if no host game find
-	if (!removeGame) {
-		console.log("Game not found: "+this.id);
+	//if no game find
+	if (!currentGame) {
+		console.log("Game not found: "+ gameId);
 		return;
 	}
+
+	// remove game associate to player
+	playersInGame[this.id] = null;
+
+	if (gameId === this.id || currentGame.getStatus === 'INPROGRESS'){
+		// Host Game & in progress
+		//remove the hosted game from the list of games
+		gameList.splice(gameList.indexOf(currentGame), 1);
 	
-	//remove the hosted game from the list of games
-	gameList.splice(gameList.indexOf(removeGame), 1);
-	
-	//force refresh gamelist to others
-	this.broadcast.emit("list games", gameList.filter(checkWaitingGame).slice(0,4));
+		//force refresh gamelist to others
+		this.broadcast.emit("list games", gameList.filter(checkWaitingGame).slice(0,4));
+
+	} else {
+		if (currentGame.getStatus() === 'WAITING'){
+			currentGame.removePlayer(this.id);
+			this.to(gameId).broadcast.emit("list players", currentGame.getPlayers());
+		}
+	}
 }
 
 var gameById = function (id) {
@@ -161,6 +173,8 @@ function onHostGame() {
 
 		var currentPlayer = playerById(this.id);
 		game.addPlayer(currentPlayer);
+
+		playersInGame[this.is] = this.id;
 
 		gameList.push(game);
 
@@ -190,6 +204,8 @@ function onJoinGame(data) {
 	//add player to game
 	var currentPlayer = playerById(this.id);
 	game.addPlayer(currentPlayer);
+	
+	playersInGame[this.id] = data.id;
 	
 	this.to(data.id).broadcast.emit("list players", game.getPlayers());
 	this.emit("game joined", game);

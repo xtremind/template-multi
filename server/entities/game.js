@@ -34,6 +34,14 @@ Game.prototype = {
                 return this.players[i];
         }    
         return false;
+    },
+
+    getStatus: function(){
+        return this.status;
+    },
+
+    start: function() {
+        this.status = 'INPROGRESS';
     }
 }
 
