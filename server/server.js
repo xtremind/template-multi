@@ -129,7 +129,7 @@ function onClientDisconnect () {
 		return;
 	}
 
-	// remove game associate to player
+	// remove game associated to player
 	playersInGame[this.id] = null;
 
 	if (gameId === this.id || currentGame.getStatus === 'INPROGRESS'){
