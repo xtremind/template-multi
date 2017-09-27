@@ -13,10 +13,10 @@ Game.prototype = {
         return this.players;
     },
 
-    addPlayer: function(playerId){
-        var existingPlayer = this.playerById(playerId);
+    addPlayer: function(player){
+        var existingPlayer = this.playerById(player.getId());
         if (!existingPlayer) {
-            this.players.push(playerId);
+            this.players.push(player);
         }
     },
 
@@ -30,7 +30,7 @@ Game.prototype = {
 
     playerById: function (id) {
         for (var i = 0; i < this.players.length; i++) {
-            if (this.players[i] == id)
+            if (this.players[i].getId() == id)
                 return this.players[i];
         }    
         return false;

@@ -4,13 +4,15 @@ var express = require("express"),
     io = require("socket.io").listen(http);
 
 
-	var Game = require("./entities/game");
+	var Game = require("./entities/game"),
+		Player = require("./entities/player");
 
 // Broadcasting loop works better than sending an update every time a player moves because waiting for player movement messages adds
 // another source of jitter.
 var updateInterval = 100; // Broadcast updates every 100 ms.
 
-var gameList = [];
+var gameList = [],
+	playerList = [];
 
 // Serve up index.html.
 app.use(express.static("client"));
@@ -38,8 +40,12 @@ function init() {
 function setEventHandlers () {
 	io.on("connection", function(client) {
 		console.log("New player has connected: " + client.id);
+		var player = new Player(client.id);
+		playerList.push(player);
 
 		client.on("disconnect", onClientDisconnect);
+		
+		client.on("rename", onRename);
 
 		client.on("get gamelist", onGameList);
 		client.on("host game", onHostGame);
@@ -50,6 +56,20 @@ function setEventHandlers () {
 		
 		client.on("start game on server", onStartGame);
 	});
+}
+
+function onRename(data) {
+	console.log("onRename");
+	var currentPlayer = playerById(this.id);
+	currentPlayer.setName(data);
+}
+
+var playerById = function (id) {
+    for (var i = 0; i < playerList.length; i++) {
+        if (playerList[i].id == id)
+            return playerList[i];
+    }
+    return false;
 }
 
 function onPlayerList(data) {
@@ -96,12 +116,14 @@ function onLeaveGame(data) {
 
 function onClientDisconnect () {
     console.log("onClientDisconnect");
-	console.log("\tPlayer disconnected: "+this.id);
+	console.log("\tPlayer disconnected: " + this.id);
 	
+	// TODO remove player from playerList
+
     //find the game by his id
 	var removeGame = gameById(this.id);
 	
-	//if no game find
+	//if no host game find
 	if (!removeGame) {
 		console.log("Game not found: "+this.id);
 		return;
@@ -136,8 +158,12 @@ function onHostGame() {
 	if(!gameAlreadyHostBy(this.id)){
 		console.log("host new game : " + this.id);
 		var game = new Game(this.id);
-		game.addPlayer(this.id);
+
+		var currentPlayer = playerById(this.id);
+		game.addPlayer(currentPlayer);
+
 		gameList.push(game);
+
 		this.join(this.id);
 		this.emit("game joined", game);
 		this.broadcast.emit("list games", gameList);
@@ -158,8 +184,13 @@ function onJoinGame(data) {
 		return;
 	}
 
+	// join a room to only communicate in
 	this.join(data.id);
-	game.addPlayer(this.id);
+
+	//add player to game
+	var currentPlayer = playerById(this.id);
+	game.addPlayer(currentPlayer);
+	
 	this.to(data.id).broadcast.emit("list players", game.getPlayers());
 	this.emit("game joined", game);
 }
