@@ -134,6 +134,10 @@ function onClientDisconnect () {
 
 	if (gameId === this.id || currentGame.getStatus === 'INPROGRESS'){
 		// Host Game & in progress
+		
+		// force leave current game
+		this.to(gameId).broadcast.emit("end game", currentGame);
+
 		//remove the hosted game from the list of games
 		gameList.splice(gameList.indexOf(currentGame), 1);
 	
