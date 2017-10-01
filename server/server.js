@@ -179,7 +179,7 @@ function onHostGame(data) {
 		currentPlayer.setName(data.name);
 		game.addPlayer(currentPlayer);
 
-		playersInGame[this.is] = this.id;
+		playersInGame[this.id] = this.id;
 
 		gameList.push(game);
 
