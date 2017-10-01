@@ -4,7 +4,7 @@ window.onload = function () {
 
     //Initialise game variable
     game = new Phaser.Game(800, 640, Phaser.CANVAS, 'gameContainer');
-    
+
     //Declare states
     game.state.add('Boot', Game.Boot);
     game.state.add('Preloader', Game.Preloader);

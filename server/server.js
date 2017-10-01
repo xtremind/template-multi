@@ -169,13 +169,14 @@ function checkWaitingGame(game){
 	return game.status == "WAITING";
 }
 
-function onHostGame() {
+function onHostGame(data) {
 	console.log("onHostGame");
 	if(!gameAlreadyHostBy(this.id)){
 		console.log("host new game : " + this.id);
 		var game = new Game(this.id);
 
 		var currentPlayer = playerById(this.id);
+		currentPlayer.setName(data.name);
 		game.addPlayer(currentPlayer);
 
 		playersInGame[this.is] = this.id;
@@ -207,6 +208,7 @@ function onJoinGame(data) {
 
 	//add player to game
 	var currentPlayer = playerById(this.id);
+	currentPlayer.setName(data.name);
 	game.addPlayer(currentPlayer);
 	
 	playersInGame[this.id] = data.id;

@@ -3,10 +3,13 @@ Game.MainMenu = function (game) {
 };
 
 Game.MainMenu.prototype = {
-    create : function () {
+    create : function () {       
 		console.log("MainMenu.create");
         position = 0,
             that = this;
+
+        //Add Library
+        game.add.plugin(PhaserInput.Plugin);
 
         // add a background image
 
@@ -14,8 +17,26 @@ Game.MainMenu.prototype = {
         var title = this.add.text(this.world.centerX, 80, 'Template Game', {font: '50px Arial', fill: '#ffffff'});
         title.anchor.setTo(0.5, 0.5);
 
+        //add input text for naming player
+        var playerName = game.add.inputField(10, 90, {
+            font: '18px Arial',
+            fill: '#212121',
+            fontWeight: 'bold',
+            width: 150,
+            padding: 8,
+            borderWidth: 1,
+            borderColor: '#000',
+            borderRadius: 6
+        });
+
+        if (typeof game.playerName === 'undefined'){
+            game.playerName="Player"+socket.id.substring(0,6);
+        }
+
+        playerName.setText(game.playerName);
+
         //add rounded buttons
-        this.drawButton("Host Game", "1", position++, function(){socket.emit('host game', {});});
+        this.drawButton("Host Game", "1", position++, function(){game.playerName=playerName.value;socket.emit('host game', {name: playerName.value});});
 
 		socket.on("list games", function(data){
             // delete current join List            
@@ -29,8 +50,9 @@ Game.MainMenu.prototype = {
             // create new join List
             data.forEach(function(party){
                 that.gameList[party.id] = that.drawButton("Join Party", party.id, ++position, function(){
+                    game.playerName=playerName.value;
                     console.log("join game " + party.id); 
-                    socket.emit('join game', {id: party.id});
+                    socket.emit('join game', {id: party.id, name: playerName.value});
                 });
             });
         });
