@@ -41,6 +41,7 @@ Game.WaitingRoom.prototype = {
             // if hoster : button start if more at least 2 players
             if(game.currentGameId === this.id && data.length > 1){
                 startButton =that.drawButton("Start Game", "1", position++, function(){
+                    this.resetEvents();
                     socket.emit('start game', {id: game.currentGameId});
                     that.state.start('Party');
                 });
@@ -48,19 +49,24 @@ Game.WaitingRoom.prototype = {
 		});
 
 		socket.on("end game", function(data){
-            socket.off("list players");
-            socket.off("end game");
+            this.resetEvents();
             game.currentGameId = null;
             that.state.start('MainMenu');
         });
+
+        
+		socket.on("start game", function(data){
+            this.resetEvents();
+            that.state.start('Party');
+        });
+
 
         // else : leave waiting room
         // if hoster leave room, everybody leave room
 
         this.drawButton("Leave Game", "1", position++, function(){
             socket.emit('leave game', {id: game.currentGameId});
-            socket.off("list players");
-            socket.off("end game");
+            this.resetEvents();
             game.currentGameId = null;
             that.state.start('MainMenu');
         });
@@ -71,7 +77,13 @@ Game.WaitingRoom.prototype = {
 	update : function () {
 
 	},
-	
+    
+    resetEvents : function (){
+        socket.off("list players");
+        socket.off("end game");
+        socket.off("start game");
+    },
+
     drawButton : function(btnTitle, btnId, btnPosition, callBack){
         var button = game.add.graphics(100, 100);
         return this.drawButtonWithText(button, 50, 100+70*btnPosition, 100, 50, 7, {bSize: 2, bColor: 0x0000FF, bAlpha: 1, fColor: 0x027a71, fAlpha: 1}, btnTitle, {font: '25px Arial', fill: '#ffffff'}, btnId, callBack);

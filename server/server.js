@@ -55,7 +55,7 @@ function setEventHandlers () {
 		client.on("get playerlist", onPlayerList);
 		client.on("leave game", onLeaveGame);
 		
-		client.on("start game on server", onStartGame);
+		client.on("start game", onStartGame);
 	});
 }
 
@@ -227,10 +227,15 @@ function gameAlreadyHostBy(id){
 }
 
 function onStartGame() {
-    console.log("onStartGame");
+	console.log("onStartGame");
+    //find the game by his id
+	var gameId = playersInGame[this.id];
+	var currentGame = gameById(gameId);
+
+	currentGame.start(this);
+	this.to(gameId).broadcast.emit("start game");
 }
 
 function broadcastingLoop() {
     //console.log("broadcastingLoop");
 }
-
