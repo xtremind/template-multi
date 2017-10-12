@@ -41,7 +41,7 @@ Game.WaitingRoom.prototype = {
             // if hoster : button start if more at least 2 players
             if(game.currentGameId === this.id && data.length > 1){
                 startButton =that.drawButton("Start Game", "1", position++, function(){
-                    this.resetEvents();
+                    that.resetEvents();
                     socket.emit('start game', {id: game.currentGameId});
                     that.state.start('Party');
                 });
@@ -49,14 +49,14 @@ Game.WaitingRoom.prototype = {
 		});
 
 		socket.on("end game", function(data){
-            this.resetEvents();
+            that.resetEvents();
             game.currentGameId = null;
             that.state.start('MainMenu');
         });
 
         
 		socket.on("start game", function(data){
-            this.resetEvents();
+            that.resetEvents();
             that.state.start('Party');
         });
 
@@ -66,7 +66,7 @@ Game.WaitingRoom.prototype = {
 
         this.drawButton("Leave Game", "1", position++, function(){
             socket.emit('leave game', {id: game.currentGameId});
-            this.resetEvents();
+            that.resetEvents();
             game.currentGameId = null;
             that.state.start('MainMenu');
         });
